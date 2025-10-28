@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SYNC6 | Discover the Patterns Behind the Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* layered backgrounds: subtle red streaks + hero image */
+            background:
+                radial-gradient(circle at 60% 40%, rgba(255, 0, 42, 0.12), transparent 70%),
+                repeating-linear-gradient(-45deg,
+                    rgba(255, 0, 42, 0.04) 0px,
+                    rgba(255, 0, 42, 0.04) 2px,
+                    transparent 2px,
+                    transparent 12px),
+                url("heroshot.png") center top / contain no-repeat,
+                #000;
+            background-blend-mode: screen;
+            background-attachment: fixed;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+
+
+        /* HEADER */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 40px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 0, 42, 0.3);
+        }
+
+        header .left {
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        header .center img {
+            height: 40px;
+        }
+
+        header .right button {
+            background: linear-gradient(90deg, #ff002a, #ff4d6d);
+            border: none;
+            border-radius: 40px;
+            color: #fff;
+            font-size: 1rem;
+            padding: 10px 24px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        header .right button:hover {
+            opacity: 0.8;
+        }
+
+        .tagline-hero {
+            font-size: 2rem;
+            /* was 1.4rem */
+            color: #fff;
+            text-align: center;
+            margin-top: 120px;
+            text-shadow: 0 0 10px rgba(255, 0, 42, 0.6);
+            letter-spacing: 1.5px;
+        }
+
+        .submit-btn {
+            background: #000;
+            /* solid black */
+            border: 2px solid #ff002a;
+            /* neon red stroke */
+            border-radius: 40px;
+            color: #fff;
+            font-size: 1rem;
+            padding: 10px 32px;
+            margin: 25px auto 0 auto;
+            /* centers it horizontally */
+            cursor: pointer;
+            display: block;
+            /* allows auto-centering */
+            transition: 0.3s;
+            box-shadow: 0 0 12px rgba(255, 0, 42, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: #ff002a;
+            color: #000;
+            box-shadow: 0 0 25px rgba(255, 0, 42, 0.7);
+            transform: scale(1.05);
+        }
+
+
+        .hero-cta {
+            text-align: center;
+            margin-top: 140px;
+            transform: translateY(-10px);
+
+
+        }
+
+
+        /* FLOATING ORB */
+        /* ORB (smaller + locked bottom-right) */
+        .orb {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 68px;
+            /* was 80px — 15% smaller */
+            height: 68px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff002a 0%, #400010 80%);
+            box-shadow: 0 0 18px #ff002a, inset 0 0 18px #ff002a;
+            cursor: grab;
+            animation: bob 3s ease-in-out infinite;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        /* Remove drag transforms and fix menu positioning */
+        .orb:active {
+            cursor: grabbing;
+        }
+
+        .menu {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            display: none;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .orb.active .menu {
+            display: flex;
+        }
+
+        @keyframes bob {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .orb:active {
+            cursor: grabbing;
+        }
+
+        /* ORB MENU */
+        .menu {
+            position: absolute;
+            bottom: 90px;
+            right: 0;
+            display: none;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .menu button {
+            background: #000;
+            color: #fff;
+            border: 1px solid #ff002a;
+            border-radius: 8px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: 0.3s;
+        }
+
+        .menu button:hover {
+            background: #ff002a;
+        }
+
+        .orb.active .menu {
+            display: flex;
+        }
+
+        /* MODALS */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #000;
+            border: 2px solid #ff002a;
+            border-radius: 16px;
+            padding: 28px;
+            width: 90%;
+            max-width: 520px;
+            max-height: 80vh;
+            /* limits height so it fits screen */
+            overflow-y: auto;
+            /* enables scrolling inside */
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 25px rgba(255, 0, 42, 0.25);
+            scrollbar-width: thin;
+            /* Firefox */
+            scrollbar-color: #ff002a #111;
+            /* Firefox */
+        }
+
+        /* WebKit scrollbar styling (Chrome, Safari) */
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #ff002a;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #111;
+        }
+
+
+        .modal-content h2 {
+            color: #ff002a;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .modal-content a:hover {
+            background: #ff002a;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 0, 42, 0.6);
+            transform: scale(1.05);
+        }
+
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #ff002a;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+
+        /* MODAL CONTENT */
+        .accordion {
+            background-color: #000;
+            color: #fff;
+            cursor: pointer;
+            padding: 10px 14px;
+            width: 100%;
+            border: 1px solid #ff002a;
+            border-radius: 8px;
+            text-align: left;
+            outline: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 6px;
+        }
+
+        .accordion:hover,
+        .accordion.active {
+            background-color: #ff002a;
+            color: #000;
+            box-shadow: 0 0 10px rgba(255, 0, 42, 0.5);
+        }
+
+        .panel {
+            background-color: #111;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease-out;
+            border-left: 2px solid #ff002a;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .panel p {
+            padding: 10px 14px;
+            color: #ccc;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+
+        @keyframes toastPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 0, 42, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(255, 0, 42, 0.8);
+            }
+        }
+
+        #toast.show {
+            animation: toastPulse 1.5s infinite ease-in-out;
+        }
+
+
+
+
+        @media (max-width: 768px) {
+            body {
+                background:
+                    radial-gradient(circle at 60% 40%, rgba(255, 0, 42, 0.15), transparent 70%),
+                    repeating-linear-gradient(-45deg,
+                        rgba(255, 0, 42, 0.05) 0px,
+                        rgba(255, 0, 42, 0.05) 2px,
+                        transparent 2px,
+                        transparent 12px),
+                    url("heroshot.png") center bottom / cover no-repeat,
+                    #000;
+                background-blend-mode: screen;
+                background-attachment: scroll;
+            }
+
+            /* Move hero content down slightly */
+            .hero-cta {
+                margin-top: 130px;
+                /* was 90–100px, gives more breathing room */
+                gap: 14px;
+                padding: 0 20px;
+                text-align: center;
+            }
+
+            /* Make tagline fill more vertical space */
+            .tagline-hero {
+                font-size: 2rem;
+                /* was 1.6rem — fills space more */
+                line-height: 1.35;
+                font-weight: 700;
+                letter-spacing: 1.2px;
+            }
+
+            /* Larger button for visual weight */
+            .submit-btn {
+                font-size: 1.1rem;
+                padding: 14px 38px;
+                border-width: 2px;
+                border-radius: 50px;
+            }
+
+            /* Orb positioning unchanged */
+            .orb {
+                bottom: 30px;
+                right: 30px;
+                width: 45px;
+                height: 45px;
+            }
+
+
+            #toast {
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, 30px);
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="left">SYNC6</div>
+        <div class="center"><img src="logo.png" alt="SYNC6 Logo"></div>
+        <div class="right"><button id="joinBtn">Join Waitlist</button></div>
+    </header>
+
+
+    <div class="hero-cta">
+        <h2 class="tagline-hero">Expedite the Decode, Find the SYNC.</h2>
+        <button id="submitSyncBtn" class="submit-btn">Submit Your Sync</button>
+    </div>
+
+
+
+    <footer>© 2025 Sync6. All Rights Reserved.</footer>
+
+    <!-- FLOATING ORB -->
+    <div class="orb" id="orb">
+        <div class="menu">
+            <button data-modal="about">What is SYNC6</button>
+            <button data-modal="how">The System</button>
+            <button data-modal="contact">Contact</button>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="about" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>About Sync6</h2>
+            <p>
+                <strong>Sync6</strong> is a new way of understanding sports — through patterns, numbers, and perfect
+                alignment.
+                It takes what fans, analysts, and players already feel — the rhythm of a game, the coincidences that
+                don’t feel like coincidences — and turns it into something measurable.
+                Sync6 analyzes how dates, player numbers, and historic moments connect to reveal hidden layers of
+                synchronicity within sports.
+                It’s not fantasy sports. It’s not analytics as you know it.
+                It’s the intersection of data, numerology, and intuition — a tool that helps you <em>see the game
+                    differently.</em>
+                <br><br>
+                With Sync6, every matchup has a story, every player has a pattern, and every number means something.
+                Whether you’re exploring for curiosity, content, or competition, Sync6 gives you the lens to decode what
+                others overlook.
+            </p>
+
+            <h3 style="color:#ff002a; margin: 25px 0 10px; text-align:center;">Frequently Asked Questions</h3>
+
+            <div class="faq">
+                <button class="accordion">1️⃣ What exactly is Sync6?</button>
+                <div class="panel">
+                    <p>Sync6 is a sports intelligence platform that reveals patterns and coincidences in numbers — like
+                        player jerseys, dates, and milestones — to uncover hidden correlations in games and outcomes.
+                    </p>
+                </div>
+
+                <button class="accordion">2️⃣ How does Sync6 work?</button>
+                <div class="panel">
+                    <p>The platform uses a proprietary logic engine that blends historical data, numerical
+                        relationships, and intuitive pattern recognition to produce “Sync Scores” — indicators of
+                        alignment or significance.</p>
+                </div>
+
+                <button class="accordion">3️⃣ Is this just numerology?</button>
+                <div class="panel">
+                    <p>Not exactly. Numerology is part of it, but Sync6 also uses real-world data, statistics, and
+                        contextual alignment. Think of it as <em>numerical intuition meets analytics.</em></p>
+                </div>
+
+                <button class="accordion">4️⃣ What sports does Sync6 cover?</button>
+                <div class="panel">
+                    <p>Sync6 currently focuses on major sports like the NFL, NCAA Football, and NBA — with expansion
+                        plans for MLB, UFC, and more.</p>
+                </div>
+
+                <button class="accordion">5️⃣ What can I do with Sync6?</button>
+                <div class="panel">
+                    <p>You can explore daily “syncs,” track players or matchups, and submit your own discoveries to the
+                        community — seeing what patterns stand out to others too.</p>
+                </div>
+
+                <button class="accordion">6️⃣ Is Sync6 predictive or just analytical?</button>
+                <div class="panel">
+                    <p>It’s both interpretive and exploratory. Sync6 doesn’t claim to predict the future — it helps you
+                        understand the deeper alignments that may influence outcomes.</p>
+                </div>
+
+                <button class="accordion">7️⃣ Do I need an account to use it?</button>
+                <div class="panel">
+                    <p>The core web experience is open. Deeper tools, saved syncs, and AI integrations are available
+                        through the main Sync6 app.</p>
+                </div>
+
+                <button class="accordion">8️⃣ Why the name “Sync6”?</button>
+                <div class="panel">
+                    <p>The “6” represents the six layers of numeric analysis used to evaluate each matchup — from date
+                        alignment to player number harmony. “Sync” is the essence of what we uncover: the moments when
+                        numbers align perfectly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="how" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>How It Works</h2>
+            <p style="text-align:left; color:#ccc; line-height:1.6;">
+                The inner workings of <strong>Sync6</strong> are designed to decode what most overlook.
+                Using a proprietary system that blends data, timing, and intuitive correlation,
+                Sync6 identifies when moments in sports align — when everything connects.
+                <br><br>
+                We don’t reveal our full process. We show the results.
+                Every <strong>Sync Score</strong> you see reflects a pattern recognized beneath the surface —
+                a calculated harmony between numbers, names, and moments in time.
+                <br><br>
+                The method stays hidden. The patterns speak for themselves.
+            </p>
+        </div>
+    </div>
+
+
+    <div id="contact" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Contact & Connect</h2>
+            <p style="color:#ccc; text-align:center; line-height:1.6; margin-bottom:25px;">
+                Have questions, ideas, or syncs to share?
+                Reach out or follow <strong>Sync6 Sports</strong> on our platforms below.
+            </p>
+
+            <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+                <!-- Email -->
+                <a href="mailto:syncsixsports@gmail.com" style="color:#fff; text-decoration:none; border:1px solid #ff002a; 
+                border-radius:40px; padding:10px 24px; width:80%; max-width:300px; 
+                text-align:center; transition:0.3s; box-shadow:0 0 10px rgba(255,0,42,0.2);">
+                    ✉️ syncsixsports@gmail.com
+                </a>
+
+                <!-- YouTube -->
+                <a href="https://www.youtube.com/@SyncSixSports" target="_blank" style="color:#fff; text-decoration:none; border:1px solid #ff002a; 
+                border-radius:40px; padding:10px 24px; width:80%; max-width:300px; 
+                text-align:center; transition:0.3s; box-shadow:0 0 10px rgba(255,0,42,0.2);">
+                    ▶️ YouTube Channel
+                </a>
+
+                <!-- Buy Me a Coffee -->
+                <a href="https://buymeacoffee.com/syncsixsports" target="_blank" style="color:#fff; text-decoration:none; border:1px solid #ff002a; 
+                border-radius:40px; padding:10px 24px; width:80%; max-width:300px; 
+                text-align:center; transition:0.3s; box-shadow:0 0 10px rgba(255,0,42,0.2);">
+                    ☕ Support on Buy Me a Coffee
+                </a>
+            </div>
+
+            <p style="color:#666; font-size:0.8rem; margin-top:28px; text-align:center;">
+                © 2025 Sync6 Sports. All Rights Reserved.
+            </p>
+        </div>
+    </div>
+
+
+    <div id="waitlist" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Join the Waitlist</h2>
+            <p style="color:#ccc; text-align:center; line-height:1.5; margin-bottom:15px;">
+                Be the first to experience <strong>Sync6</strong>.
+                Tell us who you are and share an example of a sync you’ve noticed — we may feature it in the app.
+            </p>
+
+            <form id="waitlistForm">
+                <input type="text" id="username" placeholder="Username" required
+                    style="width:100%;padding:10px;margin-bottom:10px;background:#111;border:1px solid #ff002a;color:#fff;border-radius:8px;">
+
+                <input type="text" id="name" placeholder="Full Name" required
+                    style="width:100%;padding:10px;margin-bottom:10px;background:#111;border:1px solid #ff002a;color:#fff;border-radius:8px;">
+
+                <input type="email" id="email" placeholder="Email" required
+                    style="width:100%;padding:10px;margin-bottom:10px;background:#111;border:1px solid #ff002a;color:#fff;border-radius:8px;">
+
+                <textarea id="example" placeholder="Share an example of 3 syncs..." rows="4"
+                    style="width:100%;padding:10px;margin-bottom:15px;background:#111;border:1px solid #ff002a;color:#fff;border-radius:8px;resize:none;"></textarea>
+
+                <button type="submit"
+                    style="background:#ff002a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;width:100%;transition:0.3s;">
+                    Submit
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="submitSync" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Submit Your Sync</h2>
+            <p style="color:#ccc; text-align:center; line-height:1.5; margin-bottom:15px;">
+                Drop your latest Sync discovery below — we review the best submissions weekly.
+            </p>
+
+            <form id="submitSyncForm">
+                <input type="text" id="syncUser" placeholder="Username or Handle" required
+                    style="width:100%;padding:10px;margin-bottom:10px;background:#111;border:1px solid #ff002a;color:#fff;border-radius:8px;">
+
+                <input type="email" id="syncEmail" placeholder="Email (optional)"
+                    style="width:100%;padding:10px;margin-bottom:10px;background:#111;border:1px solid #ff002a;color:#fff;border-radius:8px;">
+
+                <textarea id="syncExample"
+                    placeholder="Describe your Sync...'Saquon Barkley number 26 on the 26th picks up his 16th receiving touchdown on 16 DN'"
+                    rows="5"
+                    style="width:100%;padding:10px;margin-bottom:15px;background:#111;border:1px solid #ff002a;color:#fff;border-radius:8px;resize:none;"></textarea>
+
+                <button type="submit"
+                    style="background:#ff002a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;width:100%;transition:0.3s;">
+                    Submit Sync
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script type="module">
+        import { setupWaitlistForm, setupSubmitSyncForm } from "./firebase.js";
+
+        // Initialize forms
+        setupWaitlistForm();
+        setupSubmitSyncForm();
+    </script>
+
+
+    <script>
+        const orb = document.getElementById('orb');
+        const modals = document.querySelectorAll('.modal');
+        const joinBtn = document.getElementById('joinBtn');
+
+        // Open/close modals
+        document.querySelectorAll('.menu button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById(btn.dataset.modal).classList.add('active');
+                orb.classList.remove('active');
+            });
+        });
+
+        document.querySelectorAll('.close').forEach(close => {
+            close.addEventListener('click', () => close.parentElement.parentElement.classList.remove('active'));
+        });
+
+        joinBtn.addEventListener('click', () => document.getElementById('waitlist').classList.add('active'));
+
+        // Open Submit Sync modal
+        const submitSyncBtn = document.getElementById('submitSyncBtn');
+        submitSyncBtn.addEventListener('click', () => document.getElementById('submitSync').classList.add('active'));
+
+
+        // --- Improved Drag + Click ---
+        let isDragging = false;
+        let clickTimeout = null;
+        let offsetX, offsetY;
+
+        orb.addEventListener('mousedown', (e) => {
+            isDragging = false;
+            clickTimeout = setTimeout(() => { isDragging = true; }, 120); // after 120ms it's considered drag
+            offsetX = e.clientX - orb.getBoundingClientRect().left;
+            offsetY = e.clientY - orb.getBoundingClientRect().top;
+            orb.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            orb.style.left = e.clientX - offsetX + 'px';
+            orb.style.top = e.clientY - offsetY + 'px';
+            orb.style.right = 'auto';
+            orb.style.bottom = 'auto';
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            clearTimeout(clickTimeout);
+            if (!isDragging) {
+                // this is a click — toggle orb menu
+                orb.classList.toggle('active');
+            }
+            isDragging = false;
+            orb.style.transition = 'transform 0.3s ease';
+        });
+
+        // Accordion Functionality
+        const acc = document.getElementsByClassName("accordion");
+        for (let i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                const panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                }
+            });
+        }
+
+    </script>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" style="
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #000;
+  border: 2px solid #ff002a;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(255,0,42,0.5);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.95rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s ease;
+  z-index: 2000;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+"></div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        emailjs.init("FueE3eIh4qU7etu9W"); // your public key
+    </script>
+
+
+</body>
+
+</html>
